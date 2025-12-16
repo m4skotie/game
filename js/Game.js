@@ -87,7 +87,7 @@ export class Game {
     this.platforms = level.platforms.map(p => new Platform(p.x, p.y, p.w, p.h));
     this.items = level.items.map(i => new Item(i.x, i.y));
     this.goal = { ...level.goal, collected: false };
-    this.hazards = [new Hazard(0, this.canvas.height - 20, this.canvas.width, 20)];
+    this.hazards = [new Hazard(0, 485, this.canvas.width, 30)]; 
     this.player = new Player(50, 400);
     this.gameOver = false;
     this.hasWon = false;
@@ -199,6 +199,7 @@ export class Game {
     requestAnimationFrame(this.gameLoop);
   };
 }
+
 
 
 
