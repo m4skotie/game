@@ -145,7 +145,8 @@ export class Game {
     let onGround = false;
     this.platforms.forEach(platform => {
       if (this.player.checkCollision(platform)) {
-        if (this.player.vy > 0 && this.player.y + this.player.h <= platform.y + 10) {
+        // Только если падаем вниз И голова игрока выше платформы
+        if (this.player.vy > 0 && this.player.y + this.player.h < platform.y + 10) {
           this.player.y = platform.y - this.player.h;
           this.player.vy = 0;
           onGround = true;
@@ -153,7 +154,7 @@ export class Game {
       }
     });
     this.player.onGround = onGround;
-
+  
     // Огонь — смерть
     this.hazards.forEach(hazard => {
       if (this.player.checkCollision(hazard)) {
@@ -161,7 +162,7 @@ export class Game {
         this.showOverlay('💀 Ты сгорел! Попробуй снова.');
       }
     });
-
+  
     // Сбор вишен
     this.items = this.items.filter(item => {
       if (this.player.checkCollision(item)) {
@@ -171,8 +172,8 @@ export class Game {
       }
       return true;
     });
-
-    // Флаг финиша
+  
+    // Флаг
     if (!this.goal.collected &&
         this.player.x < this.goal.x + 30 &&
         this.player.x + this.player.w > this.goal.x &&
@@ -183,45 +184,14 @@ export class Game {
       this.saveBestScore();
       this.showOverlay('🏆 Уровень пройден!', true);
     }
-
-    // Падение вниз
+  
+    // Падение в бездну (страховка)
     if (this.player.y > this.canvas.height + 100) {
       this.gameOver = true;
       this.showOverlay('💀 Упал в бездну!', false);
     }
   }
 
-  update() {
-    if (this.gameOver || this.hasWon) return;
-
-    this.player.update(this.input);
-    this.items.forEach(item => item.update());
-    this.checkCollisions();
-  }
-
-    render() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-  
-    // 1. Платформы (тёмные)
-    this.ctx.fillStyle = '#3a3a5a';
-    this.platforms.forEach(p => p.draw(this.ctx));
-  
-    // 2. ОГОНЬ — теперь поверх фона, но под игроком
-    this.hazards.forEach(h => h.draw(this.ctx));
-  
-    // 3. Вишни
-    this.items.forEach(item => item.draw(this.ctx));
-  
-    // 4. Флаг
-    if (!this.goal.collected) {
-      this.ctx.font = '28px Arial';
-      this.ctx.textAlign = 'left';
-      this.ctx.fillText('🏁', this.goal.x, this.goal.y + 25);
-    }
-  
-    // 5. Игрок
-    this.player.draw(this.ctx);
-  }
 
   gameLoop = () => {
     this.update();
@@ -229,5 +199,6 @@ export class Game {
     requestAnimationFrame(this.gameLoop);
   };
 }
+
 
 
