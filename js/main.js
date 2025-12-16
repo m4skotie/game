@@ -6,7 +6,7 @@ const ctx = canvas.getContext('2d');
 const bgMusic = document.getElementById('bgMusic');
 const deathSound = document.getElementById('deathSound');
 
-// Инициализация аудио при первом взаимодействии (обход ограничений браузера)
+// Инициализация аудио при первом клике
 function initAudio() {
   bgMusic.volume = 0.4;
   deathSound.volume = 0.7;
@@ -15,8 +15,11 @@ function initAudio() {
   }
 }
 
-// Создаём игру с передачей аудио
+// Создаём игру
 const game = new Game(canvas, ctx, bgMusic, deathSound);
+
+// ВАЖНО: ЗАПУСКАЕМ ИГРУ!
+game.start(); // ← ЭТО БЫЛО ПРОПУЩЕНО!
 
 // Первый клик — включает музыку
 document.body.addEventListener('click', initAudio, { once: true });
