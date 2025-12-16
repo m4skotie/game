@@ -7,10 +7,11 @@ export class Hazard {
   }
 
   draw(ctx) {
-    ctx.font = '24px Arial';
+    ctx.font = '20px Arial';
     ctx.textAlign = 'center';
-    for (let i = this.x + 12; i < this.x + this.w; i += 24) {
-      ctx.fillText('🔥', i, this.y + 20);
+    // Рисуем огонь с шагом 30px для плотности
+    for (let i = this.x + 15; i < this.x + this.w; i += 30) {
+      ctx.fillText('🔥', i, this.y + 12);
     }
   }
 }
