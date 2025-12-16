@@ -5,9 +5,11 @@ import { Hazard } from './Hazard.js';
 import { InputHandler } from './InputHandler.js';
 
 export class Game {
-  constructor(canvas, ctx) {
+  constructor(canvas, ctx, bgMusic, deathSound) {
     this.canvas = canvas;
     this.ctx = ctx;
+    this.bgMusic = bgMusic;
+    this.deathSound = deathSound;
     this.input = new InputHandler();
     this.resetLevelData();
     this.scoreElement = document.getElementById('score-value');
@@ -24,7 +26,6 @@ export class Game {
     this.currentLevel = 0;
     this.score = 0;
     this.levels = [
-      // Уровень 1 — простой, немного огня в воздухе
       {
         platforms: [
           { x: 0, y: 480, w: 800, h: 20 },
@@ -33,7 +34,8 @@ export class Game {
           { x: 600, y: 240, w: 100, h: 20 }
         ],
         hazards: [
-          { x: 150, y: 390, w: 60, h: 20 },
+          { x: 250, y: 440, w: 60, h: 20 },
+          { x: 450, y: 360, w: 60, h: 20 }
         ],
         items: [
           { x: 240, y: 370 },
@@ -42,7 +44,6 @@ export class Game {
         ],
         goal: { x: 750, y: 200 }
       },
-      // Уровень 2 — сложнее: огонь между платформами
       {
         platforms: [
           { x: 0, y: 480, w: 800, h: 20 },
@@ -54,8 +55,8 @@ export class Game {
           { x: 600, y: 120, w: 80, h: 20 }
         ],
         hazards: [
-          { x: 150, y: 390, w: 60, h: 20 }, // между 1-й и 2-й
-          { x: 250, y: 330, w: 60, h: 20 }, // между 2-й и 3-й
+          { x: 150, y: 390, w: 60, h: 20 },
+          { x: 250, y: 330, w: 60, h: 20 },
           { x: 350, y: 270, w: 60, h: 20 },
           { x: 450, y: 210, w: 60, h: 20 },
           { x: 550, y: 150, w: 60, h: 20 }
@@ -70,7 +71,6 @@ export class Game {
         ],
         goal: { x: 700, y: 90 }
       },
-      // Уровень 3 — ещё сложнее: огонь прямо на пути
       {
         platforms: [
           { x: 0, y: 480, w: 800, h: 20 },
@@ -82,12 +82,12 @@ export class Game {
           { x: 650, y: 150, w: 60, h: 20 }
         ],
         hazards: [
-          { x: 200, y: 380, w: 60, h: 20 }, // под 1-й платф.
-          { x: 400, y: 330, w: 60, h: 20 }, // под 2-й
-          { x: 600, y: 280, w: 60, h: 20 }, // под 3-й
-          { x: 300, y: 230, w: 60, h: 20 }, // под 4-й
-          { x: 500, y: 180, w: 60, h: 20 }, // под 5-й
-          { x: 700, y: 130, w: 60, h: 20 }  // под 6-й
+          { x: 200, y: 380, w: 60, h: 20 },
+          { x: 400, y: 330, w: 60, h: 20 },
+          { x: 600, y: 280, w: 60, h: 20 },
+          { x: 300, y: 230, w: 60, h: 20 },
+          { x: 500, y: 180, w: 60, h: 20 },
+          { x: 700, y: 130, w: 60, h: 20 }
         ],
         items: [
           { x: 170, y: 370 },
@@ -136,17 +136,17 @@ export class Game {
   restart() {
     this.score = 0;
     this.loadLevel(0);
+    this.bgMusic.play();
   }
 
   nextLevel() {
     this.currentLevel++;
     if (this.currentLevel >= this.levels.length) {
       this.saveBestScore();
-      this.showOverlay('🎉 Ты прошёл все уровни! Поздравляю!');
-      this.nextBtn.classList.add('hidden');
-      this.tryBtn.classList.remove('hidden');
+      this.showWinOverlay();
     } else {
       this.loadLevel(this.currentLevel);
+      this.bgMusic.play();
     }
   }
 
@@ -155,10 +155,22 @@ export class Game {
     this.levelElement.textContent = this.currentLevel + 1;
   }
 
-  showOverlay(message, showNext = false) {
-    this.messageElement.textContent = message;
-    this.nextBtn.classList.toggle('hidden', !showNext);
-    this.tryBtn.classList.toggle('hidden', showNext);
+  showDeathOverlay() {
+    this.bgMusic.pause();
+    this.deathSound.currentTime = 0;
+    this.deathSound.play().catch(e => console.log("Death sound error:", e));
+
+    this.messageElement.textContent = '💀 Ты сгорел!';
+    this.nextBtn.classList.add('hidden');
+    this.tryBtn.classList.remove('hidden');
+    this.tryBtn.textContent = 'Начать заново';
+    this.overlay.classList.remove('hidden');
+  }
+
+  showWinOverlay() {
+    this.messageElement.textContent = '🎉 Ты прошёл все уровни! Поздравляю!';
+    this.nextBtn.classList.add('hidden');
+    this.tryBtn.classList.add('hidden');
     this.overlay.classList.remove('hidden');
   }
 
@@ -175,11 +187,11 @@ export class Game {
     });
     this.player.onGround = onGround;
 
-    // 🔥 Смерть при касании огня
+    // Смерть от огня
     this.hazards.forEach(hazard => {
       if (this.player.checkCollision(hazard)) {
         this.gameOver = true;
-        this.showOverlay('💀 Ты сгорел! Попробуй снова.');
+        this.showDeathOverlay();
       }
     });
 
@@ -193,7 +205,7 @@ export class Game {
       return true;
     });
 
-    // Флаг финиша
+    // Победа — сбор флага
     if (!this.goal.collected &&
         this.player.x < this.goal.x + 30 &&
         this.player.x + this.player.w > this.goal.x &&
@@ -202,13 +214,17 @@ export class Game {
       this.goal.collected = true;
       this.hasWon = true;
       this.saveBestScore();
-      this.showOverlay('🏆 Уровень пройден!', true);
+      this.bgMusic.pause();
+      this.messageElement.textContent = '🏆 Уровень пройден!';
+      this.nextBtn.classList.remove('hidden');
+      this.tryBtn.classList.add('hidden');
+      this.overlay.classList.remove('hidden');
     }
 
     // Падение в бездну
     if (this.player.y > this.canvas.height + 100) {
       this.gameOver = true;
-      this.showOverlay('💀 Упал в бездну!', false);
+      this.showDeathOverlay();
     }
   }
 
@@ -222,24 +238,17 @@ export class Game {
   render() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Платформы
     this.ctx.fillStyle = '#3a3a5a';
     this.platforms.forEach(p => p.draw(this.ctx));
-
-    // Вишни
     this.items.forEach(item => item.draw(this.ctx));
-
-    // 🔥 ОГОНЬ — теперь в воздухе, крупный
     this.hazards.forEach(h => h.draw(this.ctx));
 
-    // Флаг
     if (!this.goal.collected) {
       this.ctx.font = '28px Arial';
       this.ctx.textAlign = 'left';
       this.ctx.fillText('🏁', this.goal.x, this.goal.y + 25);
     }
 
-    // Игрок
     this.player.draw(this.ctx);
   }
 
@@ -249,5 +258,3 @@ export class Game {
     requestAnimationFrame(this.gameLoop);
   };
 }
-
-
