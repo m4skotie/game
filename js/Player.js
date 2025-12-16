@@ -39,6 +39,9 @@ export class Player {
 
     if (this.x < 0) this.x = 0;
     if (this.x + this.w > 800) this.x = 800 - this.w;
+    // В Player.js, в update():
+    this.vy += this.gravity;
+    if (this.vy > 10) this.vy = 10; // ← ограничение скорости падения
   }
 
   checkCollision(obj) {
@@ -56,3 +59,4 @@ export class Player {
     ctx.fillText('👾', this.x, this.y + this.h);
   }
 }
+
