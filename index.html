@@ -1,22 +1,24 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Smile Platformer</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Платформер 😄</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <div id="ui">
+    <div id="score">Счёт: <span id="score-value">0</span></div>
+    <div id="level">Уровень: <span id="level-value">1</span></div>
+    <button id="restart">🔄 Начать заново</button>
+  </div>
+  <canvas id="gameCanvas" width="800" height="500"></canvas>
+  <div id="overlay" class="hidden">
+    <h2 id="message"></h2>
+    <button id="next-level-btn" class="hidden">Следующий уровень</button>
+    <button id="try-again-btn" class="hidden">Попробовать снова</button>
+  </div>
 
-<h1>😀 Smile Platformer</h1>
-
-<div class="ui">
-    <button id="startBtn">▶ Старт</button>
-    <button id="restartBtn">🔄 Рестарт</button>
-    <span id="info"></span>
-</div>
-
-<canvas id="game" width="800" height="400"></canvas>
-
-<script type="module" src="js/main.js"></script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
