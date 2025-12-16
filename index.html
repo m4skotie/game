@@ -7,6 +7,10 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <!-- Скрытые аудио-элементы -->
+  <audio id="bgMusic" src="assets/sounds/music.mp3" loop></audio>
+  <audio id="deathSound" src="assets/sounds/death.mp3"></audio>
+
   <div id="ui">
     <div id="score">Счёт: <span id="score-value">0</span></div>
     <div id="best">Рекорд: <span id="best-value">0</span></div>
@@ -17,7 +21,7 @@
   <div id="overlay" class="hidden">
     <h2 id="message"></h2>
     <button id="next-level-btn" class="hidden">Следующий уровень</button>
-    <button id="try-again-btn" class="hidden">Попробовать снова</button>
+    <button id="try-again-btn" class="hidden">Начать заново</button>
   </div>
 
   <script type="module" src="js/main.js"></script>
