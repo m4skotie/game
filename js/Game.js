@@ -32,6 +32,9 @@ export class Game {
           { x: 400, y: 320, w: 100, h: 20 },
           { x: 600, y: 240, w: 100, h: 20 }
         ],
+        hazards: [
+          { x: 150, y: 390, w: 60, h: 20 },
+        ],
         items: [
           { x: 240, y: 370 },
           { x: 440, y: 290 },
@@ -246,4 +249,5 @@ export class Game {
     requestAnimationFrame(this.gameLoop);
   };
 }
+
 
