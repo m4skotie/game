@@ -9,7 +9,6 @@ export class Hazard {
   draw(ctx) {
     ctx.font = '24px Arial';
     ctx.textAlign = 'center';
-    // Рисуем огонь по всей ширине с шагом
     for (let i = this.x + 12; i < this.x + this.w; i += 24) {
       ctx.fillText('🔥', i, this.y + 20);
     }
