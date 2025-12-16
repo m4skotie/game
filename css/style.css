@@ -5,7 +5,9 @@
 }
 
 body {
-  background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e, #00c9ff, #92fe9d);
+  background-size: 400% 400%;
+  animation: aurora 15s ease infinite;
   font-family: 'Segoe UI', sans-serif;
   display: flex;
   flex-direction: column;
@@ -13,6 +15,11 @@ body {
   justify-content: center;
   min-height: 100vh;
   color: white;
+}
+
+@keyframes aurora {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 #ui {
@@ -74,3 +81,4 @@ body {
 #overlay button:hover {
   background: #ff5252;
 }
+
