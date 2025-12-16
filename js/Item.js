@@ -7,6 +7,8 @@ export class Item {
   }
 
   draw(ctx) {
-    ctx.fillText('⭐', this.x + 12, this.y + 20);
+    ctx.font = '24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('🍒', this.x + 12, this.y + 20);
   }
 }
