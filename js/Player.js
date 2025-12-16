@@ -6,11 +6,11 @@ export class Player {
     this.h = 30;
     this.vx = 0;
     this.vy = 0;
-    this.speed = 3;          // ↓ замедлил
-    this.jumpPower = 12;     // немного мягче
-    this.gravity = 0.5;      // плавная гравитация
+    this.speed = 3;
+    this.jumpPower = 12;
+    this.gravity = 0.5;
     this.onGround = false;
-    this.hasJumped = false;  // флаг для одиночного прыжка
+    this.hasJumped = false;
   }
 
   update(input) {
@@ -23,7 +23,6 @@ export class Player {
       this.vx = this.speed;
     }
 
-    // Прыжок — только при отпускании клавиши после нажатия (имитация одиночного нажатия)
     if ((input.keys[' '] || input.keys['ArrowUp'] || input.keys['w'] || input.keys['W'])) {
       if (this.onGround && !this.hasJumped) {
         this.vy = -this.jumpPower;
@@ -31,7 +30,6 @@ export class Player {
         this.hasJumped = true;
       }
     } else {
-      // Сброс флага, когда клавиша отпущена
       this.hasJumped = false;
     }
 
@@ -39,7 +37,6 @@ export class Player {
     this.x += this.vx;
     this.y += this.vy;
 
-    // Границы по горизонтали
     if (this.x < 0) this.x = 0;
     if (this.x + this.w > 800) this.x = 800 - this.w;
   }
