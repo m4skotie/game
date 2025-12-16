@@ -145,7 +145,7 @@ export class Game {
     let onGround = false;
     this.platforms.forEach(platform => {
       if (this.player.checkCollision(platform)) {
-        if (this.player.vy > 0 && this.player.y + this.player.h <= platform.y + 5) {
+        if (this.player.vy > 0 && this.player.y + this.player.h <= platform.y + 10) {
           this.player.y = platform.y - this.player.h;
           this.player.vy = 0;
           onGround = true;
@@ -229,4 +229,5 @@ export class Game {
     requestAnimationFrame(this.gameLoop);
   };
 }
+
 
