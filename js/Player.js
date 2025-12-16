@@ -7,8 +7,8 @@ export class Player {
     this.vx = 0;
     this.vy = 0;
     this.speed = 3;
-    this.jumpPower = 11;     // ↓ мягче
-    this.gravity = 0.4;      // ↓ плавнее
+    this.jumpPower = 11;
+    this.gravity = 0.4;
     this.onGround = false;
     this.hasJumped = false;
   }
@@ -34,8 +34,7 @@ export class Player {
     }
 
     this.vy += this.gravity;
-    // Ограничение скорости падения
-    if (this.vy > 9) this.vy = 9;
+    if (this.vy > 9) this.vy = 9; // ограничение скорости падения
 
     this.x += this.vx;
     this.y += this.vy;
