@@ -199,27 +199,27 @@ export class Game {
     this.checkCollisions();
   }
 
-  render() {
+    render() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-    // Огонь
-    this.hazards.forEach(h => h.draw(this.ctx));
-
-    // Платформы
+  
+    // 1. Платформы (тёмные)
     this.ctx.fillStyle = '#3a3a5a';
     this.platforms.forEach(p => p.draw(this.ctx));
-
-    // Вишни
+  
+    // 2. ОГОНЬ — теперь поверх фона, но под игроком
+    this.hazards.forEach(h => h.draw(this.ctx));
+  
+    // 3. Вишни
     this.items.forEach(item => item.draw(this.ctx));
-
-    // Флаг
+  
+    // 4. Флаг
     if (!this.goal.collected) {
       this.ctx.font = '28px Arial';
       this.ctx.textAlign = 'left';
       this.ctx.fillText('🏁', this.goal.x, this.goal.y + 25);
     }
-
-    // Игрок
+  
+    // 5. Игрок
     this.player.draw(this.ctx);
   }
 
@@ -229,3 +229,4 @@ export class Game {
     requestAnimationFrame(this.gameLoop);
   };
 }
+
