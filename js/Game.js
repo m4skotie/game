@@ -1,7 +1,7 @@
 import { Player } from './Player.js';
 import { Platform } from './Platform.js';
 import { Item } from './Item.js';
-import { Hazard } from './Hazard.js'; // ← новое
+import { Hazard } from './Hazard.js';
 import { InputHandler } from './InputHandler.js';
 
 export class Game {
@@ -11,11 +11,13 @@ export class Game {
     this.input = new InputHandler();
     this.resetLevelData();
     this.scoreElement = document.getElementById('score-value');
+    this.bestScoreElement = document.getElementById('best-value');
     this.levelElement = document.getElementById('level-value');
     this.overlay = document.getElementById('overlay');
     this.messageElement = document.getElementById('message');
     this.nextBtn = document.getElementById('next-level-btn');
     this.tryBtn = document.getElementById('try-again-btn');
+    this.loadBestScore();
   }
 
   resetLevelData() {
@@ -79,21 +81,31 @@ export class Game {
       }
     ];
   }
- loadLevel(levelIndex) {
+
+  loadLevel(levelIndex) {
     const level = this.levels[levelIndex];
     this.platforms = level.platforms.map(p => new Platform(p.x, p.y, p.w, p.h));
     this.items = level.items.map(i => new Item(i.x, i.y));
     this.goal = { ...level.goal, collected: false };
-
-    // 🔥 Всегда добавляем "лаву" внизу — смертельную зону
     this.hazards = [new Hazard(0, this.canvas.height - 20, this.canvas.width, 20)];
-
     this.player = new Player(50, 400);
     this.gameOver = false;
     this.hasWon = false;
     this.updateUI();
   }
 
+  loadBestScore() {
+    this.bestScore = parseInt(localStorage.getItem('alienRunBestScore')) || 0;
+    this.bestScoreElement.textContent = this.bestScore;
+  }
+
+  saveBestScore() {
+    if (this.score > this.bestScore) {
+      this.bestScore = this.score;
+      localStorage.setItem('alienRunBestScore', this.bestScore);
+      this.bestScoreElement.textContent = this.bestScore;
+    }
+  }
 
   start() {
     this.loadLevel(0);
@@ -101,13 +113,14 @@ export class Game {
   }
 
   restart() {
-    this.resetLevelData();
+    this.score = 0;
     this.loadLevel(0);
   }
 
   nextLevel() {
     this.currentLevel++;
     if (this.currentLevel >= this.levels.length) {
+      this.saveBestScore();
       this.showOverlay('🎉 Ты прошёл все уровни! Поздравляю!');
       this.nextBtn.classList.add('hidden');
       this.tryBtn.classList.remove('hidden');
@@ -141,7 +154,7 @@ export class Game {
     });
     this.player.onGround = onGround;
 
-    // 🔥 Проверка на столкновение с огнём
+    // Огонь — смерть
     this.hazards.forEach(hazard => {
       if (this.player.checkCollision(hazard)) {
         this.gameOver = true;
@@ -149,7 +162,7 @@ export class Game {
       }
     });
 
-    // Предметы (🍒)
+    // Сбор вишен
     this.items = this.items.filter(item => {
       if (this.player.checkCollision(item)) {
         this.score += 10;
@@ -159,7 +172,7 @@ export class Game {
       return true;
     });
 
-    // Цель (🏁)
+    // Флаг финиша
     if (!this.goal.collected &&
         this.player.x < this.goal.x + 30 &&
         this.player.x + this.player.w > this.goal.x &&
@@ -167,10 +180,11 @@ export class Game {
         this.player.y + this.player.h > this.goal.y) {
       this.goal.collected = true;
       this.hasWon = true;
+      this.saveBestScore();
       this.showOverlay('🏆 Уровень пройден!', true);
     }
 
-    // Падение вниз (резервная защита)
+    // Падение вниз
     if (this.player.y > this.canvas.height + 100) {
       this.gameOver = true;
       this.showOverlay('💀 Упал в бездну!', false);
@@ -181,13 +195,14 @@ export class Game {
     if (this.gameOver || this.hasWon) return;
 
     this.player.update(this.input);
+    this.items.forEach(item => item.update());
     this.checkCollisions();
   }
 
   render() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Огонь (снизу)
+    // Огонь
     this.hazards.forEach(h => h.draw(this.ctx));
 
     // Платформы
@@ -197,9 +212,10 @@ export class Game {
     // Вишни
     this.items.forEach(item => item.draw(this.ctx));
 
-    // Флаг финиша
+    // Флаг
     if (!this.goal.collected) {
       this.ctx.font = '28px Arial';
+      this.ctx.textAlign = 'left';
       this.ctx.fillText('🏁', this.goal.x, this.goal.y + 25);
     }
 
@@ -213,4 +229,3 @@ export class Game {
     requestAnimationFrame(this.gameLoop);
   };
 }
-
