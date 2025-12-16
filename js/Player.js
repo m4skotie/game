@@ -6,10 +6,11 @@ export class Player {
     this.h = 30;
     this.vx = 0;
     this.vy = 0;
-    this.speed = 5;
-    this.jumpPower = 14;
-    this.gravity = 0.6;
+    this.speed = 3;          // ↓ замедлил
+    this.jumpPower = 12;     // немного мягче
+    this.gravity = 0.5;      // плавная гравитация
     this.onGround = false;
+    this.hasJumped = false;  // флаг для одиночного прыжка
   }
 
   update(input) {
@@ -22,16 +23,23 @@ export class Player {
       this.vx = this.speed;
     }
 
-    if ((input.keys[' '] || input.keys['ArrowUp'] || input.keys['w'] || input.keys['W']) && this.onGround) {
-      this.vy = -this.jumpPower;
-      this.onGround = false;
+    // Прыжок — только при отпускании клавиши после нажатия (имитация одиночного нажатия)
+    if ((input.keys[' '] || input.keys['ArrowUp'] || input.keys['w'] || input.keys['W'])) {
+      if (this.onGround && !this.hasJumped) {
+        this.vy = -this.jumpPower;
+        this.onGround = false;
+        this.hasJumped = true;
+      }
+    } else {
+      // Сброс флага, когда клавиша отпущена
+      this.hasJumped = false;
     }
 
     this.vy += this.gravity;
     this.x += this.vx;
     this.y += this.vy;
 
-    // Границы
+    // Границы по горизонтали
     if (this.x < 0) this.x = 0;
     if (this.x + this.w > 800) this.x = 800 - this.w;
   }
@@ -48,6 +56,6 @@ export class Player {
   draw(ctx) {
     ctx.font = '30px Arial';
     ctx.textAlign = 'left';
-    ctx.fillText('😄', this.x, this.y + this.h);
+    ctx.fillText('👾', this.x, this.y + this.h);
   }
 }
