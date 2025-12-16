@@ -104,6 +104,7 @@ export class Game {
   }
 
   loadLevel(levelIndex) {
+    this.currentLevel = levelIndex; // ← ОБЯЗАТЕЛЬНО!
     const level = this.levels[levelIndex];
     this.platforms = level.platforms.map(p => new Platform(p.x, p.y, p.w, p.h));
     this.hazards = level.hazards.map(h => new Hazard(h.x, h.y, h.w, h.h));
@@ -112,7 +113,7 @@ export class Game {
     this.player = new Player(50, 400);
     this.gameOver = false;
     this.hasWon = false;
-    this.updateUI();
+    this.updateUI(); // ← обновляет UI с правильным this.currentLevel
   }
 
   loadBestScore() {
@@ -134,19 +135,18 @@ export class Game {
   }
 
   restart() {
-    this.currentLevel = 0; // ← СБРОС НОМЕРА УРОВНЯ
     this.score = 0;
-    this.loadLevel(0);
+    this.loadLevel(0); // ← внутри уже this.currentLevel = 0
     this.bgMusic.play();
-}
+  }
 
   nextLevel() {
-    this.currentLevel++;
-    if (this.currentLevel >= this.levels.length) {
+    const next = this.currentLevel + 1;
+    if (next >= this.levels.length) {
       this.saveBestScore();
       this.showWinOverlay();
     } else {
-      this.loadLevel(this.currentLevel);
+      this.loadLevel(next); // ← внутри будет: this.currentLevel = next
       this.bgMusic.play();
     }
   }
@@ -259,4 +259,5 @@ export class Game {
     requestAnimationFrame(this.gameLoop);
   };
 }
+
 
