@@ -7,8 +7,8 @@ export class Player {
     this.vx = 0;
     this.vy = 0;
     this.speed = 3;
-    this.jumpPower = 12;
-    this.gravity = 0.5;
+    this.jumpPower = 11;     // ↓ мягче
+    this.gravity = 0.4;      // ↓ плавнее
     this.onGround = false;
     this.hasJumped = false;
   }
@@ -34,14 +34,14 @@ export class Player {
     }
 
     this.vy += this.gravity;
+    // Ограничение скорости падения
+    if (this.vy > 9) this.vy = 9;
+
     this.x += this.vx;
     this.y += this.vy;
 
     if (this.x < 0) this.x = 0;
     if (this.x + this.w > 800) this.x = 800 - this.w;
-    // В Player.js, в update():
-    this.vy += this.gravity;
-    if (this.vy > 10) this.vy = 10; // ← ограничение скорости падения
   }
 
   checkCollision(obj) {
@@ -59,4 +59,3 @@ export class Player {
     ctx.fillText('👾', this.x, this.y + this.h);
   }
 }
-
