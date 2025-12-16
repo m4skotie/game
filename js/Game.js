@@ -1,6 +1,7 @@
 import { Player } from './Player.js';
 import { Platform } from './Platform.js';
 import { Item } from './Item.js';
+import { Hazard } from './Hazard.js'; // ← новое
 import { InputHandler } from './InputHandler.js';
 
 export class Game {
@@ -21,7 +22,6 @@ export class Game {
     this.currentLevel = 0;
     this.score = 0;
     this.levels = [
-      // Уровень 1
       {
         platforms: [
           { x: 0, y: 480, w: 800, h: 20 },
@@ -36,7 +36,6 @@ export class Game {
         ],
         goal: { x: 750, y: 200 }
       },
-      // Уровень 2 — больше платформ, меньше места
       {
         platforms: [
           { x: 0, y: 480, w: 800, h: 20 },
@@ -57,7 +56,6 @@ export class Game {
         ],
         goal: { x: 700, y: 90 }
       },
-      // Уровень 3 — узкие и разреженные
       {
         platforms: [
           { x: 0, y: 480, w: 800, h: 20 },
@@ -81,17 +79,21 @@ export class Game {
       }
     ];
   }
-
-  loadLevel(levelIndex) {
+ loadLevel(levelIndex) {
     const level = this.levels[levelIndex];
     this.platforms = level.platforms.map(p => new Platform(p.x, p.y, p.w, p.h));
     this.items = level.items.map(i => new Item(i.x, i.y));
     this.goal = { ...level.goal, collected: false };
+
+    // 🔥 Всегда добавляем "лаву" внизу — смертельную зону
+    this.hazards = [new Hazard(0, this.canvas.height - 20, this.canvas.width, 20)];
+
     this.player = new Player(50, 400);
     this.gameOver = false;
     this.hasWon = false;
     this.updateUI();
   }
+
 
   start() {
     this.loadLevel(0);
@@ -127,7 +129,6 @@ export class Game {
   }
 
   checkCollisions() {
-    // Платформы
     let onGround = false;
     this.platforms.forEach(platform => {
       if (this.player.checkCollision(platform)) {
@@ -140,17 +141,25 @@ export class Game {
     });
     this.player.onGround = onGround;
 
-    // Предметы
+    // 🔥 Проверка на столкновение с огнём
+    this.hazards.forEach(hazard => {
+      if (this.player.checkCollision(hazard)) {
+        this.gameOver = true;
+        this.showOverlay('💀 Ты сгорел! Попробуй снова.');
+      }
+    });
+
+    // Предметы (🍒)
     this.items = this.items.filter(item => {
       if (this.player.checkCollision(item)) {
         this.score += 10;
         this.updateUI();
-        return false; // убрать
+        return false;
       }
       return true;
     });
 
-    // Цель
+    // Цель (🏁)
     if (!this.goal.collected &&
         this.player.x < this.goal.x + 30 &&
         this.player.x + this.player.w > this.goal.x &&
@@ -161,10 +170,10 @@ export class Game {
       this.showOverlay('🏆 Уровень пройден!', true);
     }
 
-    // Падение
-    if (this.player.y > this.canvas.height) {
+    // Падение вниз (резервная защита)
+    if (this.player.y > this.canvas.height + 100) {
       this.gameOver = true;
-      this.showOverlay('💀 Ты упал! Попробуй снова.', false);
+      this.showOverlay('💀 Упал в бездну!', false);
     }
   }
 
@@ -178,19 +187,20 @@ export class Game {
   render() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
+    // Огонь (снизу)
+    this.hazards.forEach(h => h.draw(this.ctx));
+
     // Платформы
-    this.ctx.fillStyle = '#444';
+    this.ctx.fillStyle = '#3a3a5a';
     this.platforms.forEach(p => p.draw(this.ctx));
 
-    // Предметы
-    this.ctx.font = '24px Arial';
-    this.ctx.textAlign = 'center';
+    // Вишни
     this.items.forEach(item => item.draw(this.ctx));
 
-    // Цель (звезда)
-    this.ctx.fillStyle = '#FFD700';
+    // Флаг финиша
     if (!this.goal.collected) {
-      this.ctx.fillText('🌟', this.goal.x + 15, this.goal.y + 25);
+      this.ctx.font = '28px Arial';
+      this.ctx.fillText('🏁', this.goal.x, this.goal.y + 25);
     }
 
     // Игрок
@@ -203,3 +213,4 @@ export class Game {
     requestAnimationFrame(this.gameLoop);
   };
 }
+
