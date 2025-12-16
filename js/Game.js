@@ -134,10 +134,11 @@ export class Game {
   }
 
   restart() {
+    this.currentLevel = 0; // ← СБРОС НОМЕРА УРОВНЯ
     this.score = 0;
     this.loadLevel(0);
     this.bgMusic.play();
-  }
+}
 
   nextLevel() {
     this.currentLevel++;
@@ -258,3 +259,4 @@ export class Game {
     requestAnimationFrame(this.gameLoop);
   };
 }
+
