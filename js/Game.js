@@ -25,59 +25,66 @@ export class Game {
     this.score = 0;
     this.levels = [
       {
-        platforms: [
-          { x: 0, y: 470, w: 800, h: 15 },
-          { x: 200, y: 400, w: 100, h: 20 },
-          { x: 400, y: 320, w: 100, h: 20 },
-          { x: 600, y: 240, w: 100, h: 20 }
+        platforms: [{ x: 0, y: 470, w: 800, h: 15 }],
+        hazards: [
+          { x: 100, y: 470, w: 80, h: 15 },
+          { x: 600, y: 470, w: 100, h: 15 }
         ],
         items: [
-          { x: 240, y: 370 },
-          { x: 440, y: 290 },
-          { x: 640, y: 210 }
+          { x: 200, y: 430 },
+          { x: 400, y: 430 },
+          { x: 700, y: 430 }
         ],
-        goal: { x: 750, y: 200 }
+        goal: { x: 750, y: 430 }
       },
       {
         platforms: [
           { x: 0, y: 470, w: 800, h: 15 },
-          { x: 100, y: 420, w: 80, h: 20 },
-          { x: 200, y: 360, w: 80, h: 20 },
-          { x: 300, y: 300, w: 80, h: 20 },
-          { x: 400, y: 240, w: 80, h: 20 },
-          { x: 500, y: 180, w: 80, h: 20 },
-          { x: 600, y: 120, w: 80, h: 20 }
+          { x: 150, y: 400, w: 70, h: 15 },
+          { x: 300, y: 340, w: 70, h: 15 },
+          { x: 450, y: 280, w: 70, h: 15 },
+          { x: 600, y: 220, w: 70, h: 15 }
+        ],
+        hazards: [
+          { x: 200, y: 470, w: 100, h: 15 },
+          { x: 350, y: 470, w: 90, h: 15 },
+          { x: 500, y: 470, w: 80, h: 15 },
+          { x: 280, y: 400, w: 40, h: 15 }
         ],
         items: [
-          { x: 130, y: 390 },
-          { x: 230, y: 330 },
-          { x: 330, y: 270 },
-          { x: 430, y: 210 },
-          { x: 530, y: 150 },
-          { x: 630, y: 90 }
+          { x: 175, y: 370 },
+          { x: 325, y: 310 },
+          { x: 475, y: 250 },
+          { x: 625, y: 190 }
         ],
-        goal: { x: 700, y: 90 }
+        goal: { x: 650, y: 190 }
       },
       {
         platforms: [
           { x: 0, y: 470, w: 800, h: 15 },
-          { x: 150, y: 400, w: 60, h: 20 },
-          { x: 350, y: 350, w: 60, h: 20 },
-          { x: 550, y: 300, w: 60, h: 20 },
-          { x: 250, y: 250, w: 60, h: 20 },
-          { x: 450, y: 200, w: 60, h: 20 },
-          { x: 650, y: 150, w: 60, h: 20 }
+          { x: 100, y: 400, w: 60, h: 15 },
+          { x: 250, y: 350, w: 60, h: 15 },
+          { x: 400, y: 300, w: 60, h: 15 },
+          { x: 550, y: 250, w: 60, h: 15 },
+          { x: 700, y: 200, w: 60, h: 15 }
+        ],
+        hazards: [
+          { x: 50, y: 470, w: 100, h: 15 },
+          { x: 200, y: 470, w: 120, h: 15 },
+          { x: 350, y: 470, w: 100, h: 15 },
+          { x: 500, y: 470, w: 100, h: 15 },
+          { x: 130, y: 400, w: 30, h: 15 },
+          { x: 280, y: 350, w: 30, h: 15 },
+          { x: 430, y: 300, w: 30, h: 15 }
         ],
         items: [
-          { x: 170, y: 370 },
-          { x: 370, y: 320 },
-          { x: 570, y: 270 },
-          { x: 270, y: 220 },
-          { x: 470, y: 170 },
-          { x: 670, y: 120 },
-          { x: 720, y: 120 }
+          { x: 120, y: 370 },
+          { x: 270, y: 320 },
+          { x: 420, y: 270 },
+          { x: 570, y: 220 },
+          { x: 720, y: 170 }
         ],
-        goal: { x: 750, y: 120 }
+        goal: { x: 730, y: 170 }
       }
     ];
   }
@@ -85,10 +92,9 @@ export class Game {
   loadLevel(levelIndex) {
     const level = this.levels[levelIndex];
     this.platforms = level.platforms.map(p => new Platform(p.x, p.y, p.w, p.h));
+    this.hazards = level.hazards.map(h => new Hazard(h.x, h.y, h.w, h.h));
     this.items = level.items.map(i => new Item(i.x, i.y));
     this.goal = { ...level.goal, collected: false };
-    // Огонь начинается сразу под нижней платформой (470+15=485)
-    this.hazards = [new Hazard(0, 485, this.canvas.width, 30)];
     this.player = new Player(50, 400);
     this.gameOver = false;
     this.hasWon = false;
@@ -146,7 +152,6 @@ export class Game {
     let onGround = false;
     this.platforms.forEach(platform => {
       if (this.player.checkCollision(platform)) {
-        // Разрешаем приземление только сверху с запасом
         if (this.player.vy > 0 && this.player.y + this.player.h < platform.y + 12) {
           this.player.y = platform.y - this.player.h;
           this.player.vy = 0;
@@ -156,7 +161,7 @@ export class Game {
     });
     this.player.onGround = onGround;
 
-    // Огонь — смерть
+    // 🔥 Смерть от огня
     this.hazards.forEach(hazard => {
       if (this.player.checkCollision(hazard)) {
         this.gameOver = true;
@@ -186,7 +191,7 @@ export class Game {
       this.showOverlay('🏆 Уровень пройден!', true);
     }
 
-    // Падение в бездну (страховка)
+    // Падение в бездну
     if (this.player.y > this.canvas.height + 100) {
       this.gameOver = true;
       this.showOverlay('💀 Упал в бездну!', false);
@@ -195,7 +200,6 @@ export class Game {
 
   update() {
     if (this.gameOver || this.hasWon) return;
-
     this.player.update(this.input);
     this.items.forEach(item => item.update());
     this.checkCollisions();
@@ -204,24 +208,24 @@ export class Game {
   render() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // 1. Платформы
+    // Платформы
     this.ctx.fillStyle = '#3a3a5a';
     this.platforms.forEach(p => p.draw(this.ctx));
 
-    // 2. ОГОНЬ — теперь ВИДЕН под платформой
-    this.hazards.forEach(h => h.draw(this.ctx));
-
-    // 3. Вишни
+    // Вишни
     this.items.forEach(item => item.draw(this.ctx));
 
-    // 4. Флаг финиша
+    // 🔥 Огонь — выборочные зоны
+    this.hazards.forEach(h => h.draw(this.ctx));
+
+    // Флаг финиша
     if (!this.goal.collected) {
       this.ctx.font = '28px Arial';
       this.ctx.textAlign = 'left';
       this.ctx.fillText('🏁', this.goal.x, this.goal.y + 25);
     }
 
-    // 5. Игрок
+    // Игрок
     this.player.draw(this.ctx);
   }
 
